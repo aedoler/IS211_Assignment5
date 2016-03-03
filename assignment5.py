@@ -2,13 +2,23 @@
 # -*- coding: utf-8 -*-
 """Algorhythms"""
 
-import Queue
+
 import urllib2
 import os
-import random
 import csv
 import time
 
+class Queue:
+    def __init__(self):
+        self.items = []
+    def is_empty(self):
+        return self.items == []
+    def enqueue(self, item):
+        self.items.insert(0,item)
+    def dequeue(self):
+        return self.items.pop()
+    def size(self):
+        return len(self.items)
 
 def main(file):
     # create list of requests
@@ -45,15 +55,16 @@ class Server:
 
 
 class Request:
-    def __init__(self, time):
+
+    def __init__(self, time, processTime):
         self.timestamp = time
-        self.pages = random.randrange(1, 21)
+        self.processTime = processTime
 
     def get_stamp(self):
         return self.timestamp
 
     def get_pages(self):
-        return self.pages
+        return self.processTime
 
     def wait_time(self, current_time):
         return current_time - self.timestamp
@@ -62,15 +73,19 @@ def simulation(num_seconds, requestsList):
     lab_printer = Server(requestsList)
     print_queue = Queue()
     waiting_times = []
+
     for request in requestsList:
-        task = Request(request)
+        task = Request(int(request[0]), int(request[2]))
         print_queue.enqueue(task)
+        lab_printer = Server(request[2])
+
         """if simulateOneServer():
             task = Request(current_second)
             print_queue.enqueue(task)"""
+
         if (not lab_printer.busy()) and (not print_queue.is_empty()):
             next_task = print_queue.dequeue()
-            waiting_times.append(next_task.wait_time(current_second))
+            waiting_times.append(next_task.wait_time(request[0]))
             lab_printer.startNext(next_task)
         lab_printer.tick()
     average_wait = sum(waiting_times) / len(waiting_times)
