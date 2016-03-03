@@ -5,17 +5,23 @@
 import Queue
 import urllib2
 import os
+import random
+import csv
+import time
 
 
 def main(file):
+    # create list of requests
     if os.path.exists('queuedata.csv'):
-        simulateOneServer()
+        simulateOneServer('queuedata.csv')
+
     else:
         response = urllib2.urlopen(file)
         html = response.read()
         localfile = open('queuedata.csv', 'wb')
         localfile.write(html)
         localfile.close()
+
 
 class Server:
     def __init__(self, ppm):
@@ -52,14 +58,16 @@ class Request:
     def wait_time(self, current_time):
         return current_time - self.timestamp
 
-def simulation(num_seconds, pages_per_minute):
-    lab_printer = Server(pages_per_minute)
+def simulation(num_seconds, requestsList):
+    lab_printer = Server(requestsList)
     print_queue = Queue()
     waiting_times = []
-    for current_second in range(num_seconds):
-        if simulateOneServer():
+    for request in requestsList:
+        task = Request(request)
+        print_queue.enqueue(task)
+        """if simulateOneServer():
             task = Request(current_second)
-            print_queue.enqueue(task)
+            print_queue.enqueue(task)"""
         if (not lab_printer.busy()) and (not print_queue.is_empty()):
             next_task = print_queue.dequeue()
             waiting_times.append(next_task.wait_time(current_second))
@@ -70,7 +78,30 @@ def simulation(num_seconds, pages_per_minute):
           %(average_wait, print_queue.size()))
 
 
-def simulateOneServer():
+def simulateOneServer(file):
+    # call simulation
+    # simulation(totalSeconds, requestsList)
+    f = open(file, 'rb')
+    reader = csv.reader(f)
+
+    requestsList = []
+    for row in reader:
+        requestsList.append(row)
+
+    totalSeconds = requestsList[-1][0] # access total time
+    simulation(totalSeconds, requestsList)
+
+
+def simulationMultipleServers(numServers):
+    activeServers = 0
+    waitingTimeDict = dict()
+
+    for currentSecond in range(totalSeconds):
+        waitingTimes = []
+        waitingTimeDict[activeServers] = waitingTimes
+
+if __name__ == '__main__':
+    main('http://s3.amazonaws.com/cuny-is211-spring2015/requests.csv')
 
 """def new_print_task():
     num = random.randrange(1, 181)
@@ -81,3 +112,4 @@ def simulateOneServer():
 
     for i in range(10):
         simulation(3600, 5)"""
+
