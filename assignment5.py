@@ -6,9 +6,9 @@
 import urllib2
 import os
 import csv
-import time
 
-class Queue:
+
+class Queue: # I defined the class becuase it the methods didn't seem to exist with 'import Queue'
     def __init__(self):
         self.items = []
     def is_empty(self):
@@ -34,15 +34,17 @@ def main(file):
 
 
 class Server:
-    def __init__(self, ppm):
-        self.page_rate = ppm
+    def __init__(self, secsPross):
+        self.page_rate = secsPross
         self.current_task = None
         self.time_remaining = 0
+
     def tick(self):
         if self.current_task != None:
             self.time_remaining = self.time_remaining - 1
             if self.time_remaining <= 0:
                 self.current_task = None
+
     def busy(self):
         if self.current_task != None:
             return True
@@ -70,27 +72,26 @@ class Request:
         return current_time - self.timestamp
 
 def simulation(num_seconds, requestsList):
-    lab_printer = Server(requestsList)
+    for request1 in requestsList:
+        lab_printer = Server(int(request1[2]))
     print_queue = Queue()
     waiting_times = []
-
+    timeIncrement = 0
     for request in requestsList:
         task = Request(int(request[0]), int(request[2]))
         print_queue.enqueue(task)
-        lab_printer = Server(request[2])
+        current_second = int(request[0])
+        while current_second < num_seconds:
+            timeIncrement += 1
 
-        """if simulateOneServer():
-            task = Request(current_second)
-            print_queue.enqueue(task)"""
+            if (not lab_printer.busy()) and (not print_queue.is_empty()):
+                next_task = print_queue.dequeue()
+                waiting_times.append(next_task.wait_time(int(request[0])))
+                lab_printer.start_next(next_task)
 
-        if (not lab_printer.busy()) and (not print_queue.is_empty()):
-            next_task = print_queue.dequeue()
-            waiting_times.append(next_task.wait_time(request[0]))
-            lab_printer.startNext(next_task)
-        lab_printer.tick()
-    average_wait = sum(waiting_times) / len(waiting_times)
-    print("Average Wait %6.2f secs %3d tasks remaining."
-          %(average_wait, print_queue.size()))
+            average_wait = sum(waiting_times) / len(waiting_times)
+            print("Average Wait %6.2f secs %3d tasks remaining."
+                    %(average_wait, print_queue.size()))
 
 
 def simulateOneServer(file):
@@ -106,14 +107,14 @@ def simulateOneServer(file):
     totalSeconds = requestsList[-1][0] # access total time
     simulation(totalSeconds, requestsList)
 
-
+"""
 def simulationMultipleServers(numServers):
     activeServers = 0
     waitingTimeDict = dict()
 
     for currentSecond in range(totalSeconds):
         waitingTimes = []
-        waitingTimeDict[activeServers] = waitingTimes
+        waitingTimeDict[activeServers] = waitingTimes"""
 
 if __name__ == '__main__':
     main('http://s3.amazonaws.com/cuny-is211-spring2015/requests.csv')
