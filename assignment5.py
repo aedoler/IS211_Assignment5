@@ -20,10 +20,13 @@ class Queue: # I defined the class becuase it the methods didn't seem to exist w
     def size(self):
         return len(self.items)
 
-def main(file):
+def main(file, servers):
     # create list of requests
     if os.path.exists('queuedata.csv'):
-        simulateOneServer('queuedata.csv')
+        if servers is None:
+            simulateOneServer('queuedata.csv')
+        else:
+            simulateManyServers('queuedata.csv', servers)
 
     else:
         response = urllib2.urlopen(file)
@@ -82,7 +85,7 @@ def simulation(num_seconds, requestsList):
         print_queue.enqueue(task)
         current_second = int(request[0])
         while current_second < num_seconds:
-            timeIncrement += 1
+            timeIncrement += int(request[2])
 
             if (not lab_printer.busy()) and (not print_queue.is_empty()):
                 next_task = print_queue.dequeue()
@@ -107,25 +110,25 @@ def simulateOneServer(file):
     totalSeconds = requestsList[-1][0] # access total time
     simulation(totalSeconds, requestsList)
 
-"""
-def simulationMultipleServers(numServers):
+
+def simulateManyServers(requestList, numServers):
+    f = open(file, 'rb')
+    reader = csv.reader(f)
+    requestsList = []
+
+    for row in reader:
+        requestsList.append(row)
+
+    totalSeconds = requestsList[-1][0] # access total time
     activeServers = 0
     waitingTimeDict = dict()
 
     for currentSecond in range(totalSeconds):
         waitingTimes = []
-        waitingTimeDict[activeServers] = waitingTimes"""
+        waitingTimeDict[activeServers] = waitingTimes
 
 if __name__ == '__main__':
-    main('http://s3.amazonaws.com/cuny-is211-spring2015/requests.csv')
+    main('http://s3.amazonaws.com/cuny-is211-spring2015/requests.csv', None)
 
-"""def new_print_task():
-    num = random.randrange(1, 181)
-    if num == 180:
-        return True
-    else:
-        return False
 
-    for i in range(10):
-        simulation(3600, 5)"""
 
