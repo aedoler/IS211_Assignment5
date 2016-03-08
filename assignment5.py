@@ -75,17 +75,16 @@ class Request:
         return current_time - self.timestamp
 
 def simulation(num_seconds, requestsList):
-    for request1 in requestsList:
-        lab_printer = Server(int(request1[2]))
+    print num_seconds
     print_queue = Queue()
     waiting_times = []
-    timeIncrement = 0
+    current_second = 0
     for request in requestsList:
+        lab_printer = Server(int(request[2]))
         task = Request(int(request[0]), int(request[2]))
         print_queue.enqueue(task)
-        current_second = int(request[0])
         while current_second < num_seconds:
-            timeIncrement += int(request[2])
+            current_second += int(request[2])
 
             if (not lab_printer.busy()) and (not print_queue.is_empty()):
                 next_task = print_queue.dequeue()
