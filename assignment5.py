@@ -75,7 +75,6 @@ class Request:
         return current_time - self.timestamp
 
 def simulation(num_seconds, requestsList):
-    print num_seconds
     print_queue = Queue()
     waiting_times = []
     current_second = 0
@@ -83,11 +82,13 @@ def simulation(num_seconds, requestsList):
         lab_printer = Server(int(request[2]))
         task = Request(int(request[0]), int(request[2]))
         print_queue.enqueue(task)
+        print print_queue # confirming a Queue object is created
         while current_second < num_seconds:
-            current_second += int(request[2])
+            current_second += int(request[2]) # to keep track of the amount of seconds elapsed
+                                              # and end the task once the total amount possible has elapsed (num_seconds)
 
             if (not lab_printer.busy()) and (not print_queue.is_empty()):
-                next_task = print_queue.dequeue()
+                next_task = print_queue.dequeue() #Can't seem to get this to be anything other than [0]
                 waiting_times.append(next_task.wait_time(int(request[0])))
                 lab_printer.start_next(next_task)
 
@@ -110,7 +111,9 @@ def simulateOneServer(file):
     simulation(totalSeconds, requestsList)
 
 
-def simulateManyServers(requestList, numServers):
+def simulateManyServers(requestList, numServers): # This function is incomplete. You helped me with it
+                                                  # a bit during office hours, but I was unable to
+                                                  # complete it as I could not get past the single server function
     f = open(file, 'rb')
     reader = csv.reader(f)
     requestsList = []
